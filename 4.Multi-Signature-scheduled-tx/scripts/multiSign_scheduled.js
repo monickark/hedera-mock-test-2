@@ -26,7 +26,7 @@ const main = async () => {
   //Create a multi signature account with 20 Hbar starting balance
   const multiSigAccountID = await createMultiSigAccount();
   const txnInBase64 = await createScheduleTxnObj(multiSigAccountID);
-  const scheduleId = await executeScheduleTxn(txnInBase64);
+  const scheduleId = await executeScheduleTxnObj(txnInBase64);
   process.exit();
 };
 
@@ -112,7 +112,7 @@ const createScheduleTxnObj = async (multiSigAccountID) => {
   }
 };
 
-async function executeScheduleTxn(base64Obj) {
+async function executeScheduleTxnObj(base64Obj) {
   try {
     const client = await getClient();
     const transactionRebuiltRaw1 = Buffer.from(base64Obj, "base64");
