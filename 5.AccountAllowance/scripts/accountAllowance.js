@@ -7,6 +7,7 @@ const {
   AccountAllowanceApproveTransaction,
   AccountId,
   TransferTransaction,
+  TransactionId,
 } = require("@hashgraph/sdk");
 require("dotenv").config();
 
@@ -89,8 +90,14 @@ async function transferHBAR() {
     const client = await getClient();
     //Create the transaction
     const transaction = new TransferTransaction()
-      .addHbarTransfer(AccountId.fromString(accountIds[0]), new Hbar(-10))
+      .addApprovedHbarTransfer(
+        AccountId.fromString(accountIds[0]),
+        new Hbar(-10)
+      )
       .addHbarTransfer(AccountId.fromString(accountIds[2]), new Hbar(10))
+      .setTransactionId(
+        TransactionId.generate(AccountId.fromString(accountIds[1]))
+      ) // Spender must generate the TX ID or be the client
       .freezeWith(client);
 
     //Sign the transaction with the owner account key
