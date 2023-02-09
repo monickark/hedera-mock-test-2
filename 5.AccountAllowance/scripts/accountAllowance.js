@@ -38,8 +38,8 @@ async function createAccount(count) {
     console.log("Private Key :" + newAccountPrivateKey);
     console.log("Public Key :" + newAccountPublicKey);
 
-    accountIds.push(AccountId.fromString(newAccountId));
-    accountPvtKeys.push(PrivateKey.fromString(newAccountPrivateKey));
+    accountIds.push(newAccountId);
+    accountPvtKeys.push(newAccountPrivateKey);
   } catch (err) {
     console.log("Error in creating account : " + err);
   }
@@ -47,18 +47,22 @@ async function createAccount(count) {
 
 async function setAllowance() {
   try {
-    console.log("Setting account1 allowance for account0");
+    console.log("\n Setting account1 allowance for account0");
     const client = await getClient();
     //Create the transaction
-    const transaction =
-      new AccountAllowanceApproveTransaction().approveHbarAllowance(
-        accountIds[0],
-        accountIds[1],
-        Hbar.from(100)
-      );
+    const transaction = new AccountAllowanceApproveTransaction()
+      .approveHbarAllowance(
+        AccountId.fromString(accountIds[0]),
+        AccountId.fromString(accountIds[1]),
+        Hbar.from(50)
+      )
+      .freezeWith(client);
 
-    //Sign the transaction with the owner account key
-    const signTx = await transaction.sign(accountPvtKeys[0]);
+    console.log("setting allowance: " + accountPvtKeys[0]);
+    // Sign the transaction with the owner account key
+    const signTx = await transaction.sign(
+      PrivateKey.fromString(accountPvtKeys[0].toString())
+    );
 
     //Sign the transaction with the client operator private key and submit to a Hedera network
     const txResponse = await signTx.execute(client);
@@ -75,21 +79,24 @@ async function setAllowance() {
 
     //v2.13.0
   } catch (err) {
-    console.log("Error in creating account : " + err);
+    console.log("Error in setting allowance: " + err);
   }
 }
 
 async function transferHBAR() {
   try {
-    console.log("Transfering token using account1 key");
+    console.log("\n Transfering token using account1 key");
     const client = await getClient();
     //Create the transaction
     const transaction = new TransferTransaction()
-      .addHbarTransfer(accountIds[0], new Hbar(-10))
-      .addHbarTransfer(accountIds[2], new Hbar(10));
+      .addHbarTransfer(AccountId.fromString(accountIds[0]), new Hbar(-10))
+      .addHbarTransfer(AccountId.fromString(accountIds[2]), new Hbar(10))
+      .freezeWith(client);
 
     //Sign the transaction with the owner account key
-    const signTx = await transaction.sign(accountPvtKeys[1]);
+    const signTx = await transaction.sign(
+      PrivateKey.fromString(accountPvtKeys[1].toString())
+    );
 
     //Sign the transaction with the client operator private key and submit to a Hedera network
     const txResponse = await signTx.execute(client);
