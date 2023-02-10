@@ -5,4 +5,4 @@
 
 3. To run the script `node scripts/smart-contract.js`
 4. Sample output
-   ![Sample Output](./results/smartCOntract.png)
+   ![Sample Output](./results/smartContract.png)

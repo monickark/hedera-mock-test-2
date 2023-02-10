@@ -26,7 +26,6 @@ const main = async () => {
   //Create a multi signature account with 20 Hbar starting balance
   const multiSigAccountID = await createMultiSigAccount();
   const txnInBase64 = await createScheduleTxnObj(multiSigAccountID);
-  const scheduleId = await executeScheduleTxnObj(txnInBase64);
   process.exit();
 };
 
@@ -83,47 +82,10 @@ const createScheduleTxnObj = async (multiSigAccountID) => {
     const transactionObj = new ScheduleCreateTransaction()
       .setScheduledTransaction(transaction)
       .setScheduleMemo("Scheduled Transaction From Account 1 to Account 6")
-      .setAdminKey(PrivateKey.fromString(ACCOUNT_1_PRIVATE_KEY))
+      //.setAdminKey(PrivateKey.fromString(ACCOUNT_1_PRIVATE_KEY))
       .freezeWith(client);
 
-    //Signing with ACCOUNT_1_PRIVATE_KEY
-    const signedTxn1 = await transactionObj.sign(
-      PrivateKey.fromString(ACCOUNT_1_PRIVATE_KEY)
-    );
-
-    //Signing with ACCOUNT_2_PRIVATE_KEY
-    const signedTxn2 = await signedTxn1.sign(
-      PrivateKey.fromString(ACCOUNT_2_PRIVATE_KEY)
-    );
-
-    //Signing with ACCOUNT_3_PRIVATE_KEY
-    const signedTxn3 = await signedTxn2.sign(
-      PrivateKey.fromString(ACCOUNT_3_PRIVATE_KEY)
-    );
-
-    //Converting to bytes
-    const txnInBytes = signedTxn3.toBytes();
-
-    //Converting to base64
-    const txnInBase64 = Buffer.from(txnInBytes).toString("base64");
-    return txnInBase64;
-  } catch (err) {
-    console.log("Error in creating schedule obj : " + err);
-  }
-};
-
-async function executeScheduleTxnObj(base64Obj) {
-  try {
-    const client = await getClient();
-    const transactionRebuiltRaw1 = Buffer.from(base64Obj, "base64");
-    const transactionRebuilt1 = ScheduleCreateTransaction.fromBytes(
-      transactionRebuiltRaw1
-    );
-    const signedTransaction3 = await transactionRebuilt1.sign(
-      PrivateKey.fromString(ACCOUNT_1_PRIVATE_KEY)
-    );
-
-    const txResponse = await signedTransaction3.execute(client);
+    const txResponse = await transactionObj.execute(client);
     const receipt = await txResponse.getReceipt(client);
     console.log(
       `TX ${txResponse.transactionId.toString()} status: ${receipt.status}`
@@ -135,7 +97,7 @@ async function executeScheduleTxnObj(base64Obj) {
   } catch (err) {
     console.log("Error in execute scheduled tx : " + err);
   }
-}
+};
 
 const getClient = async () => {
   // If we weren't able to grab it, we should throw a new error
